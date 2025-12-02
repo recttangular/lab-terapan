@@ -11,6 +11,14 @@ model Post {
   id        Int      @id @default(autoincrement())
   title     String
   content   String
+  imageUrl  String?
   author    String
   createdAt DateTime @default(now())
+}
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique // Email tidak boleh kembar
+  password  String   // Password (nanti kita enkripsi)
+  name      String?  // Nama Aslab
+  role      String   @default("aslab") // Bisa 'admin' atau 'aslab'
 }

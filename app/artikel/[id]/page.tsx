@@ -2,12 +2,10 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-// Definisi Params untuk Next.js 16
 interface PageProps {
   params: Promise<{ id: string }>;
 }
 
-// JANGAN LUPA TULISAN 'export default' INI!
 export default async function DetailArtikel(props: PageProps) {
   const params = await props.params;
   const postId = parseInt(params.id);
@@ -29,6 +27,15 @@ export default async function DetailArtikel(props: PageProps) {
       <article>
         <header className="mb-8 border-b pb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">{post.title}</h1>
+          
+          {post.imageUrl && (
+            <img 
+              src={post.imageUrl} 
+              alt={post.title} 
+              className="w-full h-auto max-h-[500px] object-cover rounded-xl mb-8 shadow-md"
+            />
+          )}
+
           <div className="text-gray-500 text-sm">
             {new Date(post.createdAt).toLocaleDateString('id-ID')}
           </div>

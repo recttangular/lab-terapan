@@ -1,24 +1,39 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-interface Params {
-  params: Promise<{ id: string }>;
+// --- FUNGSI 1: UNTUK AMBIL DATA (GET) ---
+// (Ini yang tadi hilang makanya Dashboard error)
+export async function GET() {
+  try {
+    const posts = await prisma.post.findMany({
+      orderBy: { createdAt: 'desc' },
+    });
+    return NextResponse.json(posts);
+  } catch (error) {
+    return NextResponse.json({ message: "Gagal ambil data" }, { status: 500 });
+  }
 }
 
-export async function DELETE(request: Request, { params }: Params) {
+// --- FUNGSI 2: UNTUK SIMPAN DATA (POST) ---
+export async function POST(request: Request) {
   try {
-    // 1. TANGKAP ID (Wajib pakai await di Next.js 16)
-    const { id } = await params; 
-    const postId = parseInt(id);
+    const body = await request.json();
+    // Kita tangkap imageUrl juga
+    const { title, content, imageUrl } = body;
 
-    // 2. HAPUS DARI DATABASE
-    await prisma.post.delete({
-      where: { id: postId },
+    const newPost = await prisma.post.create({
+      data: {
+        title,
+        content,
+        // Simpan gambar (kalau string kosong, simpan sebagai null)
+        imageUrl: imageUrl || null,
+        author: "Admin Aslab",
+      },
     });
 
-    return NextResponse.json({ message: "Berhasil dihapus" }, { status: 200 });
+    return NextResponse.json(newPost, { status: 201 });
   } catch (error) {
-    console.error("Gagal hapus:", error); // Biar kelihatan errornya di terminal
-    return NextResponse.json({ message: "Gagal menghapus" }, { status: 500 });
+    console.error("Gagal simpan:", error);
+    return NextResponse.json({ message: "Gagal simpan data" }, { status: 500 });
   }
 }
