@@ -12,6 +12,7 @@ export default async function DetailArtikel(props: PageProps) {
 
   if (isNaN(postId)) return notFound();
 
+  // Cari SATU artikel saja
   const post = await prisma.post.findUnique({
     where: { id: postId },
   });
