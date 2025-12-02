@@ -2,34 +2,23 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-// Perbaikan untuk Next.js 15/16: Params adalah Promise
+// Definisi Params untuk Next.js 16
 interface PageProps {
   params: Promise<{ id: string }>;
 }
 
+// JANGAN LUPA TULISAN 'export default' INI!
 export default async function DetailArtikel(props: PageProps) {
-  // 1. KITA TUNGGU DULU PARAMS-NYA (Wajib di Next.js 16)
   const params = await props.params;
-  
-  // 2. Ambil ID dan ubah jadi Angka
   const postId = parseInt(params.id);
 
-  // Cek jika ID tidak valid (misal: /artikel/abc)
-  if (isNaN(postId)) {
-    notFound();
-  }
+  if (isNaN(postId)) return notFound();
 
-  // 3. Cari artikel di database
   const post = await prisma.post.findUnique({
-    where: {
-      id: postId,
-    },
+    where: { id: postId },
   });
 
-  // 4. Kalau artikel tidak ketemu
-  if (!post) {
-    notFound();
-  }
+  if (!post) return notFound();
 
   return (
     <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -39,25 +28,14 @@ export default async function DetailArtikel(props: PageProps) {
 
       <article>
         <header className="mb-8 border-b pb-8">
-          <span className="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full mb-4 inline-block">
-            Berita Lab
-          </span>
-          <h1 className="text-4xl font-bold text-gray-900 mb-4 leading-tight">
-            {post.title}
-          </h1>
-          <div className="flex items-center text-gray-500 text-sm">
-            <span className="font-semibold text-gray-900">{post.author}</span>
-            <span className="mx-2">•</span>
-            <span>
-              {new Date(post.createdAt).toLocaleDateString('id-ID', {
-                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
-              })}
-            </span>
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">{post.title}</h1>
+          <div className="text-gray-500 text-sm">
+            {new Date(post.createdAt).toLocaleDateString('id-ID')}
           </div>
         </header>
 
         <div 
-          className="prose prose-lg prose-blue max-w-none text-gray-700 leading-relaxed"
+          className="prose prose-lg max-w-none text-gray-700"
           dangerouslySetInnerHTML={{ __html: post.content }}
         />
       </article>

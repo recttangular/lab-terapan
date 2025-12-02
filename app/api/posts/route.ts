@@ -1,28 +1,32 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma'; // Pastikan import dari lib/prisma
 
-const prisma = new PrismaClient();
+// ... kode POST yang lama biarkan di atas sini ...
 
 export async function POST(request: Request) {
-  try {
-    // 1. Baca data yang dikirim dari Dashboard
-    const body = await request.json();
+  // ... (biarkan kode POST kamu yang lama, jangan dihapus) ...
+  // Kalau kode POST kamu masih import { PrismaClient }... ganti jadi import { prisma } from '@/lib/prisma' ya, biar konsisten.
+  const body = await request.json();
     const { title, content } = body;
 
-    // 2. Simpan ke Database PostgreSQL via Prisma
     const newPost = await prisma.post.create({
       data: {
         title: title,
         content: content,
-        author: "Admin Aslab", // Nanti bisa dibikin dinamis
+        author: "Admin Aslab",
       },
     });
-
-    // 3. Beri kabar sukses
     return NextResponse.json(newPost, { status: 201 });
+}
 
+// --- TAMBAHKAN BAGIAN INI ---
+export async function GET() {
+  try {
+    const posts = await prisma.post.findMany({
+      orderBy: { createdAt: 'desc' }, // Urutkan dari yang terbaru
+    });
+    return NextResponse.json(posts);
   } catch (error) {
-    console.error("Gagal simpan:", error);
-    return NextResponse.json({ message: "Gagal menyimpan data" }, { status: 500 });
+    return NextResponse.json({ message: "Gagal mengambil data" }, { status: 500 });
   }
 }
