@@ -15,22 +15,19 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           return null;
         }
 
+        // Pastikan tidak ada merah disini setelah langkah 2 tadi
         const user = await prisma.user.findUnique({
           where: {
             email: String(credentials.email),
           },
         });
 
-        if (!user) {
-          return null;
-        }
+        if (!user) return null;
 
         if (user.password === credentials.password) {
-          // --- PERBAIKAN PENTING ---
-          // Kita ubah user.id (Angka) menjadi String biar NextAuth tidak error
           return {
             ...user,
-            id: String(user.id), 
+            id: String(user.id), // Pastikan ini ada
           };
         }
 
@@ -40,22 +37,5 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   ],
   pages: {
     signIn: "/login",
-  },
-  callbacks: {
-    async session({ session, token }) {
-      if (session?.user && token.sub) {
-        session.user.id = token.sub;
-      }
-      return session;
-    },
-    async jwt({ token, user }) {
-      if (user) {
-        token.sub = String(user.id);
-      }
-      return token;
-    }
-  },
-  session: {
-    strategy: "jwt",
   },
 });
