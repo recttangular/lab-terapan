@@ -3,7 +3,9 @@
 import React, { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import 'react-quill-new/dist/quill.snow.css'; 
+import 'react-quill-new/dist/quill.snow.css';
+import { signOut } from "next-auth/react";
+import { UploadButton } from "@/lib/uploadthing"; // <-- Import Tombol Upload
 
 const ReactQuill = dynamic(() => import('react-quill-new'), { ssr: false }) as any;
 
@@ -15,8 +17,7 @@ type Post = {
 
 export default function DashboardPage() {
   const [title, setTitle] = useState('');
-  // STATE BARU UNTUK GAMBAR
-  const [imageUrl, setImageUrl] = useState(''); 
+  const [imageUrl, setImageUrl] = useState(''); // Link gambar otomatis terisi nanti
   const [content, setContent] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [posts, setPosts] = useState<Post[]>([]);
@@ -50,13 +51,12 @@ export default function DashboardPage() {
     await fetch('/api/posts', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      // KIRIM IMAGE URL JUGA
       body: JSON.stringify({ title, content, imageUrl }), 
     });
 
     alert("✅ Artikel Berhasil Disimpan!");
     setTitle('');
-    setImageUrl(''); // Reset input gambar
+    setImageUrl('');
     setContent('');
     setIsLoading(false);
     fetchPosts();
@@ -64,12 +64,17 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
-      {/* Sidebar (Sama seperti sebelumnya) */}
+      {/* Sidebar */}
       <aside className="w-64 bg-white border-r border-gray-200 hidden md:block fixed h-full">
         <div className="p-6"><h2 className="text-xl font-bold text-blue-700">DASHBOARD</h2></div>
         <nav className="mt-6">
           <a href="#" className="block px-6 py-3 bg-blue-50 text-blue-600 border-r-4 border-blue-600 font-medium">Kelola Artikel</a>
-          <Link href="/" className="block px-6 py-3 text-red-600 mt-12 hover:bg-red-50">Keluar</Link>
+          <button 
+            onClick={() => signOut({ callbackUrl: "/login" })} 
+            className="block w-full text-left px-6 py-3 text-red-600 mt-12 hover:bg-red-50 font-medium transition-colors"
+          >
+            Keluar
+          </button>
         </nav>
       </aside>
 
@@ -78,7 +83,6 @@ export default function DashboardPage() {
         <h1 className="text-2xl font-bold text-gray-800 mb-6">Tulis Artikel Baru ✍️</h1>
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 mb-10">
           
-          {/* Input Judul */}
           <div className="mb-4">
              <label className="block text-sm font-medium text-gray-700 mb-1">Judul Artikel</label>
              <input 
@@ -90,21 +94,42 @@ export default function DashboardPage() {
              />
           </div>
 
-          {/* --- INPUT BARU: LINK GAMBAR --- */}
-          <div className="mb-4">
-             <label className="block text-sm font-medium text-gray-700 mb-1">Link Gambar Utama (Opsional)</label>
-             <input 
-                type="url" 
-                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm" 
-                placeholder="https://contoh.com/gambar.jpg" 
-                value={imageUrl}
-                onChange={(e) => setImageUrl(e.target.value)}
-             />
-             <p className="text-xs text-gray-500 mt-1">*Copy-paste link gambar dari internet (akhiran .jpg/.png)</p>
+          {/* --- AREA UPLOAD GAMBAR --- */}
+          <div className="mb-6">
+             <label className="block text-sm font-medium text-gray-700 mb-2">Gambar Utama</label>
+             
+             {/* Jika gambar sudah ada (selesai upload), tampilkan preview */}
+             {imageUrl ? (
+               <div className="relative w-full md:w-1/2 h-48 rounded-lg overflow-hidden border border-gray-300 mb-2">
+                 <img src={imageUrl} alt="Preview" className="w-full h-full object-cover" />
+                 <button 
+                    onClick={() => setImageUrl('')}
+                    className="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded shadow hover:bg-red-600"
+                 >
+                   Ganti Gambar
+                 </button>
+               </div>
+             ) : (
+               // Jika belum ada, tampilkan Tombol Upload
+               <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 flex flex-col items-center justify-center bg-gray-50">
+                 <UploadButton
+                    endpoint="imageUploader"
+                    onClientUploadComplete={(res) => {
+                      // Upload Selesai! Simpan URL-nya
+                      console.log("Files: ", res);
+                      setImageUrl(res[0].url);
+                      alert("Upload Berhasil!");
+                    }}
+                    onUploadError={(error: Error) => {
+                      alert(`ERROR! ${error.message}`);
+                    }}
+                  />
+                  <p className="text-xs text-gray-400 mt-2">Max 4MB (JPG, PNG)</p>
+               </div>
+             )}
           </div>
-          {/* ------------------------------- */}
+          {/* -------------------------- */}
 
-          {/* Editor */}
           <div className="mb-12 h-64">
             <label className="block text-sm font-medium text-gray-700 mb-1">Konten</label>
             <ReactQuill theme="snow" value={content} onChange={setContent} className="h-48" />
@@ -119,7 +144,7 @@ export default function DashboardPage() {
           </button>
         </div>
 
-        {/* Tabel Daftar Artikel (Sama seperti sebelumnya) */}
+        {/* Tabel Artikel (Tetap Sama) */}
         <h2 className="text-xl font-bold text-gray-800 mb-4">Daftar Artikel ({posts.length})</h2>
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-10">
           <table className="min-w-full divide-y divide-gray-200">

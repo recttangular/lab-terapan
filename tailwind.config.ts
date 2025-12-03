@@ -1,12 +1,12 @@
+import { withUt } from "uploadthing/tw"; // 1. Import ini
 import type { Config } from "tailwindcss";
 
-const config: Config = {
-  // BAGIAN INI YANG TADI KOSONG/SALAH
+// 2. Bungkus config dengan withUt(...)
+export default withUt({
   content: [
-    "./app/**/*.{js,ts,jsx,tsx,mdx}",        // Cari di folder app
-    "./pages/**/*.{js,ts,jsx,tsx,mdx}",      // Cari di folder pages (jaga-jaga)
-    "./components/**/*.{js,ts,jsx,tsx,mdx}", // Cari di folder components
-    "./src/**/*.{js,ts,jsx,tsx,mdx}",        // Cari di src (jaga-jaga)
+    "./pages/**/*.{js,ts,jsx,tsx,mdx}",
+    "./components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
     extend: {
@@ -18,7 +18,6 @@ const config: Config = {
     },
   },
   plugins: [
-    require("@tailwindcss/typography"),
+    require('@tailwindcss/typography'),
   ],
-};
-export default config;
+}) satisfies Config;
