@@ -10,6 +10,9 @@ export default withUt({
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ["var(--font-sans)"],
+      },
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
         "gradient-conic":
