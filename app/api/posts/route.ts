@@ -17,19 +17,23 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { title, content, imageUrl } = body;
+    // Tambah layout dan gallery di sini
+    const { title, content, imageUrl, layout, gallery } = body; 
 
     const newPost = await prisma.post.create({
       data: {
         title,
         content,
         imageUrl: imageUrl || null,
+        // Simpan data baru
+        layout: layout || "standard",
+        gallery: gallery || [], // Kalau kosong, simpan array kosong
         author: "Admin Aslab",
       },
     });
 
     return NextResponse.json(newPost, { status: 201 });
   } catch (error) {
-    return NextResponse.json({ message: "Gagal simpan data" }, { status: 500 });
+    return NextResponse.json({ message: "Gagal simpan" }, { status: 500 });
   }
 }

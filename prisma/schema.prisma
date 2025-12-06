@@ -12,6 +12,8 @@ model Post {
   title     String
   content   String
   imageUrl  String?
+  gallery   String[] // Array: Bisa simpan banyak link foto
+  layout    String   @default("standard") // Pilihan: "standard", "gallery", "split"
   author    String
   createdAt DateTime @default(now())
 }

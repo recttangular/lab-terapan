@@ -5,10 +5,14 @@ const f = createUploadthing();
 // FileRouter untuk aplikasi kita
 export const ourFileRouter = {
   // Kita buat rute bernama "imageUploader"
-  imageUploader: f({ image: { maxFileSize: "4MB" } })
+  imageUploader: f({ 
+    image: { 
+      maxFileSize: "32MB", 
+      maxFileCount: 10 // <-- GANTI JADI 10 (Atau berapapun maumu)
+    } 
+  })
     .onUploadComplete(async ({ metadata, file }) => {
-      // Ini jalan kalau upload selesai
-      console.log("Upload selesai, url gambar:", file.url);
+      console.log("Upload selesai:", file.url);
     }),
 } satisfies FileRouter;
 
